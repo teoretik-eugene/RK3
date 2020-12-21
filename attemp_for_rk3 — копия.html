@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Дерево</title>
+        <meta charset="UTF-8">
+        <style>
+            .selected{
+                background-color: #4d9ae7;
+                position: relative;
+                
+            }
+            .unselected{
+                background-color: white;
+                position: relative;
+                
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Дерево</h1>
+        <form name="tree">
+            <input type="button" id="create" value="Создать">
+            <input type="button" id="rename" value="Переименовать">
+            <input type="button" id="delete" value="Удалить">
+        </form>
+        <br>
+        <div id="main" style="left: 20px; position: relative;">Корневой элемент</div>
+
+
+        <!--Начало скрипта-->
+        <script>
+            // Получаем форму:
+            var form = document.forms.tree;
+
+            var mainDiv = document.getElementById('main');      // Получаем корневой элемент
+            var last;                                   // Последний кликнутый элемент
+            mainDiv.addEventListener("click",select);              // Добавляем "подслушку" на главный Div "Корневой элемент";
+			
+			
+				/*
+				Описываем функцию, срабатывающую при клике:
+				*/
+  
+            function select(event){
+                if(event.target.tagName === "DIV"){
+                    let clicked = event.target;
+                    if(last == undefined){
+                        clicked.classList.toggle("selected");       // Выделяем 
+                        last = clicked;
+                    };
+                    if(last == clicked){                            // Если кликнули на тот же элемент }
+                        clicked.classList.toggle("selected");
+                        clicked.classList.toggle("unselected");
+                        last=clicked;
+                    }
+                    else{                                       // { В противном случае
+                        last.classList.remove("selected");
+                        last.classList.add("unselected");
+                        clicked.classList.remove("unselected");
+                        clicked.classList.add("selected");
+                        last=clicked;
+                    }
+                }
+            }
+            
+			
+            /*
+			Кнопки:
+			*/
+
+            document.getElementById("create").onclick = create;         // Забиндили конпку "создать"
+
+            function create(){
+                if(last.tagName === "DIV"){                         // Условие, если кликнули по DIV'у
+                let text= prompt("Enter node name");
+                var div = document.createElement("div");            // Создаем элемент
+                div.textContent = text;                             // Добавляем текст, который ввели
+                div.classList.add("unselected");
+                div.style.position = "relative";                    // Добавим стили: позицию и отступы
+                div.style.left = "30px";
+                last.appendChild(div);
+                if(last.children.length==1){                        // Добавление картинки
+                    let img = document.createElement("img");
+                    img.setAttribute('src', 'minus.png');
+                    //img.style.display = "inline";
+                    img.style.position = "relative";
+                    img.style.float = "left";
+                    img.style.top = "18px";                              // Проблемы со стилем. Я никак не могу правильно разместить картинку. 
+                    //img.style.top = "10px";
+                    img.style.left = "-5px";
+                    last.before(img);
+
+                    img.addEventListener("click", hide_view);
+					
+                    /*
+					Функция по скрытию, раскрытию дочерних элементов:
+					*/
+                    function hide_view(){
+                        if(img.getAttribute('src')=="minus.png"){	//Если кликнули на картинку с "минусом", то "дети" скрываются
+                            let parent = div.parentNode;
+                            hide(parent);
+                            img.setAttribute('src','plus.png');		// Тогда устанавливается другой атрибут у картинки
+                        }else{
+                            let parent = div.parentNode;			//Если кликнули не на "минус", то раскрываются "дети"
+                            view(parent);
+                            img.setAttribute('src','minus.png');
+                        }
+                    }
+                }
+            }
+        }
+        
+		
+            document.getElementById("delete").onclick = delete_div;     // Забиндили кнопку "удалить"
+
+            function delete_div(){      // Функция по удалению элемента 
+                last.remove();
+            }
+        
+            document.getElementById("rename").onclick = rename;     // Забиндили кнопку "Переименовать"
+
+            function rename(){                                  // Функция по замене элемента
+                let new_text = prompt("Enter NEW node name");
+                let parent = last.parentNode;
+                let new_div = document.createElement("div");
+                new_div.textContent = new_text;
+                new_div.classList.add("unselected");
+                new_div.style.position = "relative";
+                new_div.style.left = "45px";
+                parent.replaceChild(new_div, last);         // Спасибо Флэнагану за главу 15.6.3
+            }
+	
+			/*
+			Рекурсивные фунции по скрытию и расскрытию дочерних узлов:
+			*/
+	
+            function hide(elems){				
+                for(let i=0; i<elems.children.length; i++){
+                    elems.children[i].style.visibility = 'hidden';			// Присваиваем свойство:
+                    if(elems.children[i].children.length >0){hide(elems.children[i])}
+                }
+            }
+
+            function view(elems){
+                for(let i=0; i<elems.children.length; i++){
+                    elems.children[i].style.visibility = 'visible';
+                    if(elems.children[i].children.length >0){view(elems.children[i])}
+                }
+            }
+
+        </script>
+    </body>
+</html>
